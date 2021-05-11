@@ -21,11 +21,10 @@ namespace WebAPI_ADO.NET.Controllers
         // GET api/values/5
         public Employee Get(int id)
         {
-            SqlConnection sqlConnection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["TSQL2012"].ConnectionString);
             string sql = "SELECT * FROM HR.Employees WHERE EmployeeID = " + id + "";
-            SqlCommand sqlCmd = new SqlCommand(sql, sqlConnection);
 
-            sqlConnection.Open();
+            SqlConnection sqlConnection = new SqlConnection();
+            SqlCommand sqlCmd = OpenDataBaseConnection(sqlConnection, sql);
 
             SqlDataReader reader = null;
             reader = sqlCmd.ExecuteReader();
@@ -47,11 +46,12 @@ namespace WebAPI_ADO.NET.Controllers
         // POST api/values
         public void Post(Employee emp)
         {
-            SqlConnection sqlConnection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["TSQL2012"].ConnectionString);
             string sql = "INSERT INTO HR.Employees" +
                 "(LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, Country, Phone, ManagerID, Gender, MonthlyPayment, YearlyPayment) " +
                 "VALUES (@LastName, @FirstName, @Title, @TitleOfCourtesy, @BirthDate, @HireDate, @Address, @City, @Region, @Country, @Phone, @ManagerID, @Gender, null, null)";
-            SqlCommand sqlCmd = new SqlCommand(sql, sqlConnection);
+
+            SqlConnection sqlConnection = new SqlConnection();
+            SqlCommand sqlCmd = OpenDataBaseConnection(sqlConnection, sql);
 
             sqlCmd.Parameters.AddWithValue("@LastName", emp.LastName);
             sqlCmd.Parameters.AddWithValue("@FirstName", emp.FirstName);
@@ -69,7 +69,6 @@ namespace WebAPI_ADO.NET.Controllers
             sqlCmd.Parameters.AddWithValue("@MonthlyPayment", emp.MonthlyPayment);
             sqlCmd.Parameters.AddWithValue("@YearlyPayment", emp.YearlyPayment);
 
-            sqlConnection.Open();
             int rowInserted = sqlCmd.ExecuteNonQuery();
             sqlConnection.Close();
         }
@@ -82,14 +81,22 @@ namespace WebAPI_ADO.NET.Controllers
         // DELETE api/values/5
         public void Delete(int id)
         {
-            SqlConnection sqlConnection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["TSQL2012"].ConnectionString);
             string sql = "DELETE FROM HR.Employees WHERE EmployeeID = " + id + "";
 
-            SqlCommand sqlCmd = new SqlCommand(sql, sqlConnection);
+            SqlConnection sqlConnection = new SqlConnection();
+            SqlCommand sqlCmd = OpenDataBaseConnection(sqlConnection, sql);
 
-            sqlConnection.Open();
             int rowDeleted = sqlCmd.ExecuteNonQuery();
             sqlConnection.Close();
+        }
+
+        public SqlCommand OpenDataBaseConnection(SqlConnection sqlConnection, string sql)
+        {
+            sqlConnection = new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["TSQL2012"].ConnectionString);
+            SqlCommand sqlCmd = new SqlCommand(sql, sqlConnection);
+            sqlConnection.Open();
+
+            return sqlCmd;
         }
     }
 }
